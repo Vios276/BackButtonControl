@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "deploy": "gh-pages -d com.sample.backbuttonkey",
-    "ipk:pwa": "ares-package -o . pwa",
-    "ipk:backbuttonkey": "ares-package -o . com.sample.backbuttonkey"
+    "ipk:pwa": "ares-package -o ipk pwa",
+    "ipk:backbuttonkey": "ares-package -o ipk com.sample.backbuttonkey"
   },
   "repository": {
     "type": "git",
