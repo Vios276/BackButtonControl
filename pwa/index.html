@@ -1,0 +1,210 @@
+<!doctype html>
+<html>
+  <head>
+    <style type="text/css">
+      body {
+        width: 100%;
+        height: 100%;
+        background-color: #000000;
+      }
+    </style>
+    <script src="webOSTVjs-1.2.11/webOSTV.js" charset="utf-8"></script>
+    <script src="webOSTVjs-1.2.11/webOSTV-dev.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      // Function to fetch and process the JSON file
+      function fetchJSONFile(url, callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.overrideMimeType('application/json');
+        xhr.open('GET', url, true);
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState === 4 && xhr.status === 200) {
+            callback(xhr.responseText);
+          }
+        };
+        xhr.send(null);
+      }
+      /**
+       * WebOS is using NodeJS as framework : https://webostv.developer.lge.com/develop/guides/js-service-basic
+       * Note: NodeJS 12 doesn't support optional chaining, it's available in NodeJS >= 14.
+       */
+      function makeQuery(modelName, version, cpuName) {
+        const modelNameQuery = modelName ? `modelName=${modelName}` : '';
+        const versionQuery = version ? `osVersion=${version}` : '';
+        const cpuNameQuery = cpuName ? `cpuName=${cpuName}` : '';
+        const allQueries = [modelNameQuery, versionQuery, cpuNameQuery].filter((str) => !!str);
+        return allQueries.length > 0 ? `?${allQueries.join('&')}` : '';
+      }
+      function getDeeplinkParam() {
+        // Payload from LG Game Shelf will send
+        const palmsSystemLaunchParams = (window.PalmSystem && window.PalmSystem.launchParams) || '';
+        const launchParams = window.launchParams || palmsSystemLaunchParams;
+        if (!launchParams) {
+          return '';
+        }
+        let params = null;
+        // luna-send command line works fine without checking JSON.parse but GameShelf needs it
+        try {
+          params = JSON.parse(launchParams);
+        } catch (e) {
+          params = launchParams;
+        }
+        if (!params.contentTarget) {
+          return '';
+        }
+        // gameId will be carried in contentTarget field
+        const viewGameDeeplink = `/#/deeplink?page=${params.contentTarget}`;
+        return viewGameDeeplink;
+      }
+      function launchPWA(query) {
+        const deeplink = getDeeplinkParam();
+        window.setTimeout(() => {
+          const appUrl = `https://vios276.github.io/BackButtonControl/`;
+          const launchUrl = `${appUrl}${query}${deeplink}`;
+          var wsb = new WebOSServiceBridge();
+          wsb.call(
+            'luna://com.webos.applicationManager/launch',
+            `{
+              "id":"com.webos.app.browser",
+              "params":{
+                "target":"${launchUrl}",
+                "pwaMode":true,
+                "nonUiMode":true,
+                "nrcuMode":false,
+                "backgroundClose":false,
+                "disableBackHistoryAPI":true,
+                "bgColor":"#000000",
+                "supportTouchMode":"none",
+                "pwaId": "com.k-araoke.tv.lg-dev"
+              },
+              "noSplash":true
+            }`,
+          );
+          window.close();
+        }, 2000);
+      }
+      webOS.service.request('luna://com.webos.service.tv.systemproperty', {
+        method: 'getSystemInfo',
+        parameters: {
+          keys: ['modelName', 'firmwareVersion', 'boardType'],
+        },
+        onComplete: function (response) {
+          var success = response.returnValue;
+          if (success) {
+            const boardType = response.boardType;
+            const cpuName = boardType.substring(0, boardType.indexOf('_')).replace('/', '');
+            const query = makeQuery(response.modelName, response.firmwareVersion, cpuName);
+            launchPWA(query);
+          } else {
+            webOS.deviceInfo((device) => {
+              const query = makeQuery(device.modelName, device.version);
+              launchPWA(query);
+            });
+          }
+        },
+      });
+    </script>
+  </head>
+  <style>
+    @font-face {
+      font-family: 'CoreDream';
+      src: url('./S-CoreDream-9Black.woff') format('woff');
+    }
+
+    body {
+      margin: 0;
+    }
+    .container {
+      height: 100vh;
+      background: #000000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .loading {
+      display: flex;
+      flex-direction: row;
+    }
+    .loading__letter {
+      font-size: 88px;
+      font-weight: normal;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      font-family: 'CoreDream';
+      color: #ffffff;
+      animation-name: bounce;
+      animation-duration: 2s;
+      animation-iteration-count: infinite;
+    }
+
+    .loading__letter:nth-child(2) {
+      animation-delay: 0.1s;
+    }
+    .loading__letter:nth-child(3) {
+      animation-delay: 0.2s;
+    }
+    .loading__letter:nth-child(4) {
+      animation-delay: 0.3s;
+    }
+    .loading__letter:nth-child(5) {
+      animation-delay: 0.4s;
+    }
+    .loading__letter:nth-child(6) {
+      animation-delay: 0.5s;
+    }
+    .loading__letter:nth-child(7) {
+      animation-delay: 0.6s;
+    }
+    .loading__letter:nth-child(8) {
+      animation-delay: 0.8s;
+    }
+    .loading__letter:nth-child(9) {
+      animation-delay: 1s;
+    }
+    .loading__letter:nth-child(10) {
+      animation-delay: 1.2s;
+    }
+
+    @keyframes bounce {
+      0% {
+        transform: translateY(0px);
+      }
+      40% {
+        transform: translateY(-40px);
+      }
+      80%,
+      100% {
+        transform: translateY(0px);
+      }
+    }
+
+    @media (max-width: 700px) {
+      .loading__letter {
+        font-size: 50px;
+      }
+    }
+
+    @media (max-width: 340px) {
+      .loading__letter {
+        font-size: 40px;
+      }
+    }
+  </style>
+  <body>
+    <div class="container">
+      <div class="loading">
+        <div class="loading__letter">L</div>
+        <div class="loading__letter">o</div>
+        <div class="loading__letter">a</div>
+        <div class="loading__letter">d</div>
+        <div class="loading__letter">i</div>
+        <div class="loading__letter">n</div>
+        <div class="loading__letter">g</div>
+        <div class="loading__letter">.</div>
+        <div class="loading__letter">.</div>
+        <div class="loading__letter">.</div>
+      </div>
+    </div>
+    <p>.</p>
+  </body>
+</html>

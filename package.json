@@ -1,0 +1,22 @@
+{
+  "name": "backbuttoncontrol",
+  "version": "1.0.0",
+  "description": "For webOS TV, a back button control function based on the browser history is supported through the use of the DOM's history object. The current app on the webOS TV screen can move to the home UI of webOS TV or previous page of the app with the back button of a remote control.",
+  "main": "index.js",
+  "scripts": {
+    "deploy": "gh-pages -d com.sample.backbuttonkey"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vios276/BackButtonControl.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Vios276/BackButtonControl/issues"
+  },
+  "homepage": "https://vios276.github.io/BackButtonControl/",
+  "dependencies": {
+    "gh-pages": "^6.3.0"
+  }
+}
